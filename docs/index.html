@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sell or Keep? — The Moving-Day Math</title>
+<meta name="description" content="Moving? Run the honest math: sell your home and invest the proceeds, or keep it as a rental. Ten-year wealth comparison, target rent, and the capital-gains exclusion clock.">
+<meta name="theme-color" content="#1F3522">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<style>
+:root{
+  --green:#1F3522; --ivory:#F5F2E8; --gold:#B49A5B; --oxblood:#5C2A2A; --char:#2C2C2C;
+  --paper:#FBF9F2; --line:#E3DCC6; --muted:#7A7566;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+body{margin:0; background:var(--ivory); color:var(--char);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.5}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif}
+.wrap{max-width:760px; margin:0 auto; padding:0 16px 120px}
+.hero{background:var(--green); color:var(--ivory); padding:28px 20px 24px; border-bottom:4px solid var(--gold)}
+.hero-inner{max-width:760px; margin:0 auto}
+.eyebrow{color:var(--gold); letter-spacing:3px; font-size:12px; font-weight:700; text-transform:uppercase; margin:0 0 8px}
+.hero h1{margin:0 0 8px; font-size:34px; line-height:1.15; letter-spacing:.5px}
+.hero p.lede{margin:0; font-size:17px; color:#EDE7D3; max-width:36em}
+.hero p.lede strong{color:var(--gold)}
+.card{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:18px; margin:16px 0}
+.card h2{margin:0 0 4px; font-size:23px; color:var(--green)}
+.card .sub{color:var(--muted); font-size:14.5px; margin:0 0 12px}
+label{display:block; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin:14px 0 6px}
+input[type=number],input[type=text],select{width:100%; font-size:18px; padding:13px 12px; border-radius:10px;
+  border:1.5px solid var(--line); background:#fff; color:var(--char); min-height:52px}
+input:focus,select:focus{outline:2px solid var(--gold); border-color:var(--gold)}
+.hint{font-size:13px; color:var(--muted); margin-top:5px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media(max-width:520px){.grid2{grid-template-columns:1fr}}
+.seg-row{display:flex; gap:8px}
+.seg{flex:1; border:2px solid var(--line); background:#fff; border-radius:12px; padding:12px 6px; cursor:pointer; text-align:center; font-size:15px; font-weight:700; color:var(--char)}
+.seg.on{border-color:var(--gold); background:#FFFDF4; box-shadow:0 0 0 1px var(--gold)}
+/* verdict */
+.verdict{border-radius:16px; padding:22px 18px; margin:20px 0; text-align:center; border:2px solid}
+.verdict.sell{background:#F7EAEA; border-color:var(--oxblood)}
+.verdict.keep{background:#EEF4EA; border-color:#4E7A4A}
+.verdict.coin{background:#F6F1E2; border-color:var(--gold)}
+.verdict .word{font-family:Georgia,serif; font-size:44px; font-weight:800; margin:0 0 4px; letter-spacing:1px}
+.verdict.sell .word{color:var(--oxblood)}
+.verdict.keep .word{color:#2F5C2A}
+.verdict.coin .word{color:#7A6420}
+.verdict .gap{font-size:21px; font-weight:700; margin:0 0 8px}
+.verdict .why{font-size:15px; color:var(--char); max-width:34em; margin:0 auto}
+.verdict .clock{margin-top:12px; padding:10px 12px; border-radius:10px; background:rgba(180,154,91,.14);
+  border:1px dashed var(--gold); font-size:14px; text-align:left}
+.statgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0}
+@media(max-width:520px){.statgrid{grid-template-columns:1fr}}
+.stat{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px}
+.stat .v{font-family:Georgia,serif; font-size:26px; font-weight:700; color:var(--green)}
+.stat .v.bad{color:var(--oxblood)}
+.stat .l{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:2px}
+.stat .n{font-size:13px; color:var(--muted); margin-top:4px; line-height:1.4}
+canvas#chart{width:100%; height:280px; display:block; background:#fff; border:1px solid var(--line); border-radius:12px}
+.legend{display:flex; gap:18px; font-size:14px; color:var(--muted); margin:8px 2px 0}
+.legend i{display:inline-block; width:22px; height:4px; border-radius:2px; margin-right:6px; vertical-align:middle}
+table{width:100%; border-collapse:collapse; font-size:15px; margin-top:8px}
+th,td{padding:10px 8px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--muted)}
+td.win{font-weight:800}
+td .tag{font-size:11px; font-weight:800; padding:2px 8px; border-radius:20px; letter-spacing:1px}
+.tag.k{background:#EEF4EA; color:#2F5C2A; border:1px solid #4E7A4A}
+.tag.s{background:#F7EAEA; color:var(--oxblood); border:1px solid var(--oxblood)}
+.btn{display:block; width:100%; border:0; border-radius:14px; font-size:18px; font-weight:800;
+  padding:16px; cursor:pointer; min-height:58px; margin-top:12px}
+.btn.primary{background:var(--green); color:var(--ivory)}
+.btn.ghost{background:transparent; color:var(--green); border:2px solid var(--green); font-size:16px; min-height:50px; padding:12px}
+.btn.danger{background:transparent; color:var(--oxblood); border:1px solid var(--oxblood); font-size:14px; min-height:40px; padding:8px}
+.scn{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; margin:10px 0}
+.scn .nm{font-weight:800; font-size:17px; color:var(--green)}
+.scn .meta{font-size:13px; color:var(--muted); margin:4px 0 8px}
+.scn .row{display:flex; gap:8px}
+.scn .row .btn{min-height:40px; font-size:14px; padding:8px; margin-top:0}
+.method{background:var(--green); color:#EDE7D3; border-radius:14px; padding:20px 18px; margin:24px 0}
+.method h2{color:var(--gold); margin:0 0 10px; font-size:22px}
+.method p{font-size:15px; margin:0 0 10px}
+.method p strong{color:#fff}
+.footer{color:var(--muted); font-size:13px; margin-top:28px; line-height:1.6}
+.sticky{position:fixed; left:0; right:0; bottom:0; background:var(--green); color:var(--ivory);
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom)); display:flex; align-items:center; justify-content:space-between;
+  border-top:3px solid var(--gold); z-index:50}
+.sticky .t{font-size:13px; color:#EDE7D3}
+.sticky .amt{font-family:Georgia,serif; font-size:22px; font-weight:800}
+.sticky .amt.g{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="hero"><div class="hero-inner">
+  <p class="eyebrow">The moving-day math</p>
+  <h1>Sell or Keep?</h1>
+  <p class="lede">You're moving. Now the only question that matters: <strong>sell the house and invest the money</strong>, or <strong>keep it as a rental</strong> and let someone else pay the mortgage? Ten-year wealth math, the rent you'd need to win, and the capital-gains clock you're racing.</p>
+</div></div>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>1 · The house</h2>
+    <p class="sub">What you own and what you still owe.</p>
+    <label>Home value today</label>
+    <input type="number" id="v0" value="450000" inputmode="decimal">
+    <label>Years you've lived here as your primary home</label>
+    <input type="number" id="lived" value="5" inputmode="decimal">
+    <div class="hint">Two years unlocks the $250k/$500k capital-gains exclusion. Less than that and the tax math changes completely.</div>
+    <label>Total cost basis (what you paid + improvements)</label>
+    <input type="number" id="basis" value="320000" inputmode="decimal">
+  </div>
+
+  <div class="card">
+    <h2>2 · The mortgage</h2>
+    <p class="sub">What's left on the loan you're handing to a tenant.</p>
+    <div class="grid2">
+      <div><label>Remaining balance</label><input type="number" id="bal" value="280000" inputmode="decimal"></div>
+      <div><label>Rate (% APR)</label><input type="number" id="mrate" value="6.5" step="0.01" inputmode="decimal"></div>
+    </div>
+    <label>Years left on the loan</label>
+    <input type="number" id="myears" value="28" inputmode="decimal">
+  </div>
+
+  <div class="card">
+    <h2>3 · If you sell</h2>
+    <p class="sub">The honest net — after everyone takes their cut.</p>
+    <div class="grid2">
+      <div><label>Agent commissions (% of price)</label><input type="number" id="comm" value="5.5" step="0.1" inputmode="decimal"></div>
+      <div><label>Other closing costs (% of price)</label><input type="number" id="close" value="1.5" step="0.1" inputmode="decimal"></div>
+    </div>
+    <label>Filing status (capital-gains exclusion)</label>
+    <div class="seg-row" id="filing-row">
+      <button class="seg" data-v="single">Single · $250k</button>
+      <button class="seg on" data-v="married">Married · $500k</button>
+    </div>
+    <label>Capital-gains tax rate (combined %, if exclusion doesn't cover you)</label>
+    <input type="number" id="gainRate" value="20" step="0.5" inputmode="decimal">
+  </div>
+
+  <div class="card">
+    <h2>4 · If you keep it as a rental</h2>
+    <p class="sub">Underwrite it like an investor would — because you are one now.</p>
+    <label>Monthly rent you could charge</label>
+    <input type="number" id="rent" value="2800" inputmode="decimal">
+    <div class="grid2">
+      <div><label>Vacancy (% of rent / yr)</label><input type="number" id="vac" value="5" step="0.5" inputmode="decimal"></div>
+      <div><label>Annual rent growth (%)</label><input type="number" id="rgrow" value="3" step="0.5" inputmode="decimal"></div>
+    </div>
+    <div class="grid2">
+      <div><label>Property tax ($/mo)</label><input type="number" id="ptax" value="450" inputmode="decimal"></div>
+      <div><label>Insurance ($/mo)</label><input type="number" id="ins" value="150" inputmode="decimal"></div>
+    </div>
+    <label>HOA ($/mo)</label>
+    <input type="number" id="hoa" value="0" inputmode="decimal">
+    <div class="grid2">
+      <div><label>Maintenance (% of value / yr)</label><input type="number" id="maint" value="1" step="0.25" inputmode="decimal"></div>
+      <div><label>CapEx reserve (% of value / yr)</label><input type="number" id="capex" value="0.75" step="0.25" inputmode="decimal"></div>
+    </div>
+    <label>Property management</label>
+    <div class="seg-row" id="mgt-row">
+      <button class="seg on" data-v="self">Self-managed</button>
+      <button class="seg" data-v="pro">Manager · 10%</button>
+    </div>
+    <div class="grid2">
+      <div><label>Annual appreciation (%)</label><input type="number" id="appr" value="4" step="0.5" inputmode="decimal"></div>
+      <div><label>Your marginal tax rate (%)</label><input type="number" id="marg" value="24" step="0.5" inputmode="decimal"></div>
+    </div>
+    <label>Building value (% of price, for depreciation)</label>
+    <input type="number" id="bldg" value="85" step="1" inputmode="decimal">
+    <div class="hint">Land can't be depreciated — only the structure, written off over 27.5 years. That paper loss is a real tax shield.</div>
+  </div>
+
+  <div class="card">
+    <h2>5 · The alternative</h2>
+    <p class="sub">What the sale money would do if you let it go to work in the market.</p>
+    <div class="grid2">
+      <div><label>Market return (% / yr)</label><input type="number" id="mret" value="7" step="0.5" inputmode="decimal"></div>
+      <div><label>Time horizon (years)</label><input type="number" id="horiz" value="10" inputmode="numeric"></div>
+    </div>
+  </div>
+
+  <div class="verdict coin" id="verdict">
+    <p class="word" id="v-word">…</p>
+    <p class="gap" id="v-gap"></p>
+    <p class="why" id="v-why"></p>
+    <div class="clock" id="v-clock"></div>
+  </div>
+
+  <div class="card">
+    <h2>The numbers</h2>
+    <p class="sub">First-year snapshot and the rent that flips the answer.</p>
+    <div class="statgrid">
+      <div class="stat"><div class="v" id="s-proceeds">—</div><div class="l">Net proceeds if you sell</div><div class="n" id="s-proceeds-n">After mortgage payoff, commissions, closing and capital-gains tax.</div></div>
+      <div class="stat"><div class="v" id="s-cf">—</div><div class="l">Year-1 cash flow</div><div class="n" id="s-cf-n">Rent minus vacancy, expenses and the mortgage. Before tax.</div></div>
+      <div class="stat"><div class="v" id="s-cfat">—</div><div class="l">Year-1 cash flow, after tax</div><div class="n">Interest write-off + depreciation shield included.</div></div>
+      <div class="stat"><div class="v" id="s-cap">—</div><div class="l">Cap rate on today's value</div><div class="n">Year-1 NOI divided by home value. Your rental's "yield".</div></div>
+      <div class="stat"><div class="v" id="s-target">—</div><div class="l">Rent needed to beat selling</div><div class="n" id="s-target-n">Keep everything else fixed — the monthly rent that makes keeping richer.</div></div>
+      <div class="stat"><div class="v" id="s-eq">—</div><div class="l">Equity you'd keep working</div><div class="n">Home value minus mortgage today. Your skin in the rental game.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Wealth, year by year</h2>
+    <p class="sub">Keep = equity + reinvested after-tax cash flow. Sell = proceeds invested in the market. Apples to apples.</p>
+    <canvas id="chart"></canvas>
+    <div class="legend"><span><i style="background:#B49A5B"></i>Keep as rental</span><span><i style="background:#1F3522"></i>Sell &amp; invest</span></div>
+    <div style="overflow-x:auto"><table id="yr-table">
+      <thead><tr><th>Year</th><th>Keep</th><th>Sell</th><th>Leader</th><th>Gap</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>Saved scenarios</h2>
+    <p class="sub">Keep a few versions — current rent vs. optimistic rent, self-managed vs. manager.</p>
+    <label>Scenario name</label>
+    <input type="text" id="scn-name" placeholder="e.g. rent $3,000, self-managed">
+    <button class="btn ghost" id="scn-save">Save this scenario</button>
+    <div id="scn-list"></div>
+  </div>
+
+  <div class="method">
+    <h2>How the math works</h2>
+    <p><strong>Selling</strong> means proceeds after the mortgage payoff, agent commissions, closing costs and capital-gains tax — then that cash compounds in the market at your assumed return.</p>
+    <p><strong>Keeping</strong> means your equity compounds through appreciation and amortization, <em>plus</em> every year's after-tax cash flow reinvested at that same market return. Comparing wealth, not monthly cash flow, is the only honest frame — a rental can lose money monthly and still win on equity.</p>
+    <p><strong>Depreciation</strong> is the quiet hero: the building (not the land) writes off over 27.5 years, creating a paper loss that shields rental income from taxes. The IRS takes some back as depreciation recapture when you eventually sell — this tool doesn't model recapture, so keeping's edge is slightly overstated on long holds.</p>
+    <p><strong>The exclusion clock:</strong> live in it 2 of the last 5 years and up to $250k/$500k of gain is tax-free. Move out and the clock starts — roughly 3 years later the exclusion is gone. If your gain is big, that clock alone can be the deciding factor.</p>
+    <p>Simplified on purpose: no state-by-state tax rules, no PMI, no refinancing, no "tenant trashes the place" premium. Not tax advice — run the final version past your CPA.</p>
+  </div>
+
+  <p class="footer">Sell or Keep? · a thebullbrew daily tool · built for homeowners at the moving crossroads.<br>
+  Wealth math, not vibes. Figures are estimates — verify before you sign anything.</p>
+</div>
+
+<div class="sticky" id="sticky"><div><div class="t" id="st-t">Verdict</div><div class="amt" id="st-amt">—</div></div></div>
+<script>
+/* Sell or Keep? — moving-day wealth math */
+const $ = id => document.getElementById(id);
+const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
+const money = x => { const s = "$" + Math.abs(Math.round(x)).toLocaleString("en-US"); return x < 0 ? "\u2212" + s : s; };
+const moneyK = x => { const a = Math.abs(x);
+  if (a >= 1e6) return (x < 0 ? "\u2212" : "") + "$" + (a / 1e6).toFixed(2) + "M";
+  if (a >= 1e4) return (x < 0 ? "\u2212" : "") + "$" + Math.round(a / 1e3) + "k";
+  return money(x); };
+
+/* segmented controls */
+function segVal(rowId) {
+  const el = $(rowId).querySelector(".seg.on");
+  return el ? el.dataset.v : null;
+}
+["filing-row", "mgt-row"].forEach(rid => {
+  $(rid).querySelectorAll(".seg").forEach(b => b.addEventListener("click", () => {
+    $(rid).querySelectorAll(".seg").forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+    calc();
+  }));
+});
+
+function readInputs(rentOverride) {
+  return {
+    v0: num("v0"), lived: num("lived"), basis: num("basis"),
+    bal: num("bal"), mrate: num("mrate"), myears: num("myears"),
+    comm: num("comm"), close: num("close"),
+    filing: segVal("filing-row"), gainRate: num("gainRate"),
+    rent: rentOverride !== undefined ? rentOverride : num("rent"),
+    vac: num("vac"), rgrow: num("rgrow"),
+    ptax: num("ptax"), ins: num("ins"), hoa: num("hoa"),
+    maint: num("maint"), capex: num("capex"),
+    mgtSelf: segVal("mgt-row") === "self",
+    appr: num("appr"), marg: num("marg"), bldg: num("bldg"),
+    mret: num("mret"), horiz: Math.max(1, Math.min(30, Math.round(num("horiz")) || 10))
+  };
+}
+
+/* core model — returns full year-by-year breakdown */
+function core(p) {
+  const H = p.horiz, a = p.appr / 100, g = p.rgrow / 100, ret = p.mret / 100;
+  const r = p.mrate / 100 / 12, n = Math.round(p.myears * 12);
+  let M = 0;
+  if (p.bal > 0 && n > 0) M = r > 0 ? p.bal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1) : p.bal / n;
+
+  const rows = [];
+  let bal = p.bal, fv = 0;
+  const dep = (p.bldg / 100 * p.v0) / 27.5;
+  for (let t = 1; t <= H; t++) {
+    const value = p.v0 * Math.pow(1 + a, t);
+    // mortgage: month-by-month, honoring payoff mid-year
+    let intT = 0, payT = 0, b = bal;
+    if (b > 0) for (let m = 1; m <= 12; m++) {
+      if ((t - 1) * 12 + m > n) break;
+      const im = b * r; b -= (M - im); intT += im; payT += M;
+    }
+    bal = Math.max(0, b);
+    const gross = p.rent * 12 * Math.pow(1 + g, t - 1);
+    const eff = gross * (1 - p.vac / 100);
+    const tax = p.ptax * 12 * Math.pow(1 + a, t - 1);
+    const ins = p.ins * 12 * Math.pow(1.02, t - 1);
+    const hoa = p.hoa * 12;
+    const maint = p.maint / 100 * value;
+    const capex = p.capex / 100 * value;
+    const mgt = p.mgtSelf ? 0 : 0.10 * eff;
+    const exp = tax + ins + hoa + maint + capex + mgt;
+    const cf = eff - exp - payT;
+    const taxBill = (eff - exp - intT - dep) * p.marg / 100;
+    const cfat = cf - taxBill;
+    fv = fv * (1 + ret) + cfat;
+    const equity = value - bal;
+    rows.push({ t, value, bal, eff, exp, cf, cfat, equity, keepW: equity + fv });
+  }
+
+  // sell path
+  const sellCost = p.v0 * (p.comm + p.close) / 100;
+  const gain = p.v0 - p.basis;
+  const eligible = p.lived >= 2;
+  const excl = eligible ? (p.filing === "married" ? 500000 : 250000) : 0;
+  const taxG = Math.max(0, gain - excl) * p.gainRate / 100;
+  const P = p.v0 - p.bal - sellCost - taxG;
+
+  const keep0 = p.v0 - p.bal;
+  const sellW = [P], keepW = [keep0];
+  for (let t = 1; t <= H; t++) {
+    sellW.push(P * Math.pow(1 + ret, t));
+    keepW.push(rows[t - 1].keepW);
+  }
+  return { H, rows, P, sellW, keepW, sellCost, taxG, gain, eligible, excl, M };
+}
+
+/* rent that exactly flips the verdict (wealth is affine in rent) */
+function targetRent(p, res) {
+  const sellH = res.sellW[res.H];
+  if (p.rent <= 0) return null;
+  const p0 = Object.assign({}, p, { rent: 0 });
+  const r0 = core(p0);
+  const A = r0.keepW[r0.H];
+  const B = (res.keepW[res.H] - A) / p.rent;
+  if (B <= 0) return Infinity;
+  const tgt = (sellH - A) / B;
+  return tgt;
+}
+
+function calc() {
+  const p = readInputs();
+  const res = core(p);
+  const H = res.H;
+  const keepH = res.keepW[H], sellH = res.sellW[H];
+  const gap = keepH - sellH;
+  const tol = Math.max(5000, 0.05 * Math.max(Math.abs(keepH), Math.abs(sellH), 1));
+  const v = $("verdict");
+  const vWord = $("v-word"), vGap = $("v-gap"), vWhy = $("v-why"), vClock = $("v-clock");
+  v.classList.remove("sell", "keep", "coin");
+  const tgt = targetRent(p, res);
+
+  if (gap > tol) {
+    v.classList.add("keep"); vWord.textContent = "KEEP";
+    vGap.textContent = "Keeping beats selling by " + money(gap) + " over " + H + " years";
+    vWhy.textContent = "Even if the monthly cash flow looks thin, appreciation plus the tenant paying down your mortgage compounds into real wealth. Landlords get rich on equity, not rent.";
+  } else if (gap < -tol) {
+    v.classList.add("sell"); vWord.textContent = "SELL";
+    vGap.textContent = "Selling beats keeping by " + money(-gap) + " over " + H + " years";
+    vWhy.textContent = "The rent just doesn't justify tying up this much equity. Take the proceeds, put them in the market, and let compounding do the work without the 2 a.m. plumbing calls.";
+  } else {
+    v.classList.add("coin"); vWord.textContent = "TOSS-UP";
+    vGap.textContent = "Within " + money(Math.abs(gap)) + " of each other — genuinely close";
+    vWhy.textContent = "The math is a coin flip, so decide on life, not spreadsheets: do you want to be a landlord, or do you want to be done?";
+  }
+
+  if (res.eligible) {
+    const d = new Date(); d.setFullYear(d.getFullYear() + 3);
+    const ds = d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    vClock.innerHTML = "<strong>Exclusion clock:</strong> you've lived here " + p.lived + " years, so your " +
+      money(res.excl) + " capital-gains exclusion is intact <strong>today</strong>. Move out and the 2-of-5-year rule starts ticking — sell by <strong>" + ds +
+      "</strong> or the tax-free window closes. Gain on this sale: " + money(res.gain) +
+      (res.taxG > 0 ? " — tax due " + money(res.taxG) + " after exclusion." : " — fully covered by the exclusion.");
+  } else {
+    vClock.innerHTML = "<strong>No exclusion yet:</strong> you need 2 years of primary residence for the $250k/$500k exclusion. " +
+      "Sell now and the full gain of " + money(res.gain) + " is taxable (" + money(res.taxG) + " due at your rate). Time is literally money here.";
+  }
+
+  const r1 = res.rows[0];
+  const noi = r1.eff - r1.exp;
+  $("s-proceeds").textContent = money(res.P);
+  $("s-proceeds-n").textContent = "After " + money(res.sellCost) + " in sale costs and " + money(res.taxG) + " capital-gains tax.";
+  const cfEl = $("s-cf");
+  cfEl.textContent = money(r1.cf) + "/yr";
+  cfEl.classList.toggle("bad", r1.cf < 0);
+  const cfatEl = $("s-cfat");
+  cfatEl.textContent = money(r1.cfat) + "/yr";
+  cfatEl.classList.toggle("bad", r1.cfat < 0);
+  $("s-cap").textContent = (p.v0 > 0 ? (noi / p.v0 * 100).toFixed(2) : "0") + "%";
+  const tEl = $("s-target");
+  if (tgt === null) { tEl.textContent = "—"; }
+  else if (!isFinite(tgt)) { tEl.textContent = "Unreachable"; $("s-target-n").textContent = "No realistic rent beats selling — the equity is too productive elsewhere."; }
+  else if (tgt <= 0) { tEl.textContent = "$0/mo"; $("s-target-n").textContent = "Keeping already beats selling even with no rent. This one's not close."; }
+  else { tEl.textContent = money(Math.round(tgt)) + "/mo"; $("s-target-n").textContent = "At this rent the two paths tie. Below it, sell. Above it, keep."; }
+  const eqEl = $("s-eq");
+  eqEl.textContent = money(p.v0 - p.bal);
+  eqEl.classList.toggle("bad", p.v0 - p.bal < 0);
+
+  // table
+  const tb = $("yr-table").querySelector("tbody");
+  tb.innerHTML = "";
+  const idx = [1, 2, 3, 4, 5];
+  if (H > 5) idx.push(Math.round(H / 2), H); else for (let t = 6; t <= H; t++) idx.push(t);
+  const seen = new Set();
+  idx.forEach(t => {
+    if (t > H || seen.has(t)) return; seen.add(t);
+    const k = res.keepW[t], s = res.sellW[t], gp = k - s;
+    const tr = document.createElement("tr");
+    const lead = gp >= 0 ? '<span class="tag k">KEEP</span>' : '<span class="tag s">SELL</span>';
+    tr.innerHTML = "<td>" + t + "</td><td class='" + (gp >= 0 ? "win" : "") + "'>" + moneyK(k) +
+      "</td><td class='" + (gp < 0 ? "win" : "") + "'>" + moneyK(s) + "</td><td>" + lead +
+      "</td><td>" + (gp >= 0 ? "+" : "\u2212") + moneyK(Math.abs(gp)).replace("$", "$") + "</td>";
+    tb.appendChild(tr);
+  });
+
+  drawChart(res);
+
+  // sticky
+  $("st-amt").textContent = vWord.textContent + " · " + money(Math.abs(gap));
+  $("st-amt").className = "amt " + (v.classList.contains("keep") ? "g" : "");
+}
+function drawChart(res) {
+  const cv = $("chart");
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.clientWidth || 700, Hh = 280;
+  cv.width = W * dpr; cv.height = Hh * dpr;
+  const c = cv.getContext("2d"); c.scale(dpr, dpr);
+  const padL = 56, padR = 14, padT = 16, padB = 30;
+  const all = res.keepW.concat(res.sellW);
+  let lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+  if (hi - lo < 1) hi = lo + 1;
+  lo = Math.min(lo, 0) - (hi - lo) * 0.05; hi += (hi - lo) * 0.05;
+  const X = t => padL + (W - padL - padR) * t / res.H;
+  const Y = v => padT + (Hh - padT - padB) * (1 - (v - lo) / (hi - lo));
+  c.clearRect(0, 0, W, Hh);
+  c.strokeStyle = "#E3DCC6"; c.fillStyle = "#7A7566"; c.font = "11px sans-serif";
+  c.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const v = lo + (hi - lo) * i / 4, y = Y(v);
+    c.beginPath(); c.moveTo(padL, y); c.lineTo(W - padR, y); c.stroke();
+    c.textAlign = "right"; c.fillText(moneyK(v), padL - 6, y + 4);
+  }
+  c.textAlign = "center";
+  [0, res.H].forEach(t => c.fillText("yr " + t, X(t), Hh - 10));
+  const line = (arr, color) => {
+    c.strokeStyle = color; c.lineWidth = 3; c.beginPath();
+    arr.forEach((v, t) => t ? c.lineTo(X(t), Y(v)) : c.moveTo(X(t), Y(v)));
+    c.stroke();
+  };
+  line(res.sellW, "#1F3522");
+  line(res.keepW, "#B49A5B");
+  // end dots
+  c.fillStyle = "#1F3522"; c.beginPath(); c.arc(X(res.H), Y(res.sellW[res.H]), 5, 0, 7); c.fill();
+  c.fillStyle = "#B49A5B"; c.beginPath(); c.arc(X(res.H), Y(res.keepW[res.H]), 5, 0, 7); c.fill();
+}
+
+/* saved scenarios */
+const KEY = "sellOrKeep.scenarios.v1";
+function loadAll() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } }
+function storeAll(a) { localStorage.setItem(KEY, JSON.stringify(a)); }
+
+const INPUT_IDS = ["v0","lived","basis","bal","mrate","myears","comm","close","gainRate",
+  "rent","vac","rgrow","ptax","ins","hoa","maint","capex","appr","marg","bldg","mret","horiz"];
+function snapshot() {
+  const p = readInputs();
+  const res = core(p);
+  const gap = res.keepW[res.H] - res.sellW[res.H];
+  const inputs = {};
+  INPUT_IDS.forEach(id => inputs[id] = $(id).value);
+  inputs.filing = segVal("filing-row"); inputs.mgt = segVal("mgt-row");
+  const tgt = targetRent(p, res);
+  return {
+    id: Date.now(),
+    name: $("scn-name").value.trim() || ("Scenario " + new Date().toLocaleDateString("en-US")),
+    inputs, gap: Math.round(gap), H: res.H, proceeds: Math.round(res.P),
+    rent: p.rent, target: tgt === null ? null : (isFinite(tgt) ? Math.round(tgt) : "inf")
+  };
+}
+function renderSaved() {
+  const list = $("scn-list");
+  const all = loadAll();
+  list.innerHTML = "";
+  if (!all.length) {
+    list.innerHTML = '<p class="hint">Nothing saved yet. Try current rent vs. a dream rent.</p>';
+    return;
+  }
+  all.slice().reverse().forEach(s => {
+    const d = document.createElement("div");
+    d.className = "scn";
+    const tag = s.gap > 0 ? "KEEP" : s.gap < 0 ? "SELL" : "TIE";
+    const tg = s.target === "inf" ? "unreachable" : s.target === null ? "—" : money(s.target) + "/mo";
+    d.innerHTML = '<div class="nm"></div><div class="meta">' + tag + ' by ' + money(Math.abs(s.gap)) +
+      ' over ' + s.H + 'y · proceeds ' + money(s.proceeds) + ' · rent ' + money(s.rent) +
+      '/mo · target rent ' + tg + '</div>' +
+      '<div class="row"><button class="btn ghost" data-a="load">Load</button>' +
+      '<button class="btn danger" data-a="del">Delete</button></div>';
+    d.querySelector(".nm").textContent = s.name;
+    d.querySelector('[data-a="load"]').addEventListener("click", () => {
+      INPUT_IDS.forEach(id => { $(id).value = s.inputs[id]; });
+      [["filing-row", s.inputs.filing], ["mgt-row", s.inputs.mgt]].forEach(([rid, v]) => {
+        $(rid).querySelectorAll(".seg").forEach(x => x.classList.toggle("on", x.dataset.v === v));
+      });
+      calc();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    d.querySelector('[data-a="del"]').addEventListener("click", () => {
+      storeAll(loadAll().filter(x => x.id !== s.id));
+      renderSaved();
+    });
+    list.appendChild(d);
+  });
+}
+$("scn-save").addEventListener("click", () => {
+  const all = loadAll(); all.push(snapshot()); storeAll(all); renderSaved();
+  $("scn-name").value = "";
+});
+
+/* wiring */
+INPUT_IDS.forEach(id => $(id).addEventListener("input", calc));
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+renderSaved();
+calc();
+</script>
+</body>
+</html>
